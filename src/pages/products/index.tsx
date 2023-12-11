@@ -70,11 +70,6 @@ const Products = () => {
     setLoading(false);
   }, [debounce, search]);
 
-  // pagination load more data
-  const loadMoreProducts = () => {
-    setSkip(skip + take);
-  };
-
   // redirect to details
   const redirectToDetails = (productId: number) => {
     router.push(`/products/${productId}`);
@@ -117,7 +112,7 @@ const Products = () => {
           </div>
           {search || search !== "" ? null : (
             <div className="flex justify-center mt-4">
-              <button onClick={() => loadMoreProducts} type="button" className="bg-slate-500 p-2 rounded">
+              <button onClick={() => setSkip(skip + take)} type="button" className="bg-slate-500 p-2 rounded">
                 <p className="text-base font-semibold text-white">Load More</p>
               </button>
             </div>
