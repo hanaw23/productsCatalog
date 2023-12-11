@@ -4,11 +4,12 @@ import { Product } from "../../model/product.type";
 
 const Products = () => {
   const router = useRouter();
+  const take = 10;
+  const [skip, setSkip] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [debounce, setDebounce] = useState<string>("");
-  const [tempDataSearch, setTempDataSearch] = useState<Product[]>([]);
 
   //  Fetch Data
   useEffect(() => {
@@ -24,7 +25,7 @@ const Products = () => {
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
-      const data = await fetch("https://dummyjson.com/products");
+      const data = await fetch(`https://dummyjson.com/products/?limit=10&skip=0`);
       const json = await data.json();
 
       // set state with the result
@@ -34,6 +35,25 @@ const Products = () => {
     fetchData().catch(console.error);
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const query = `https://dummyjson.com/products/?limit=${take}&skip=${skip}`;
+    const fetchData = async () => {
+      const data = await fetch(query);
+      const json = await data.json();
+
+      // set state with the result
+      if (products.length > 0) {
+        setProducts([...products, ...json.products]);
+      } else {
+        setProducts(json.products);
+      }
+    };
+
+    fetchData().catch(console.error);
+    setLoading(false);
+  }, [skip]);
 
   useEffect(() => {
     setLoading(true);
@@ -49,6 +69,11 @@ const Products = () => {
     fetchData().catch(console.error);
     setLoading(false);
   }, [debounce, search]);
+
+  // pagination load more data
+  const loadMoreProducts = () => {
+    setSkip(skip + take);
+  };
 
   // redirect to details
   const redirectToDetails = (productId: number) => {
@@ -74,7 +99,7 @@ const Products = () => {
               onChange={(e: { target: { value: SetStateAction<string> } }) => setSearch(e.target.value as string)}
             />
           </div>
-          <div className="mt-10 grid grid-cols-4 gap-4 mx-10">
+          <div className="mt-10 grid grid-cols-5 gap-5 mx-10">
             {products.map((product) => (
               <div key={product.id} className="border rounded bg-gray-300 p-4 cursor-pointer" onClick={() => redirectToDetails(product.id)}>
                 <div className="flex justify-center">
@@ -90,6 +115,13 @@ const Products = () => {
               </div>
             ))}
           </div>
+          {search || search !== "" ? null : (
+            <div className="flex justify-center mt-4">
+              <button onClick={() => loadMoreProducts} type="button" className="bg-slate-500 p-2 rounded">
+                <p className="text-base font-semibold text-white">Load More</p>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
